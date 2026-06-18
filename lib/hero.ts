@@ -1,11 +1,16 @@
 import type { HeroSlide, MediaType } from "./types";
+import type { WatchPlatformFilter } from "./watch-platform";
 import {
   getMovieDetails,
   getTvDetails,
-  getNowPlaying,
-  getTrending,
+  discoverByPlatform,
   getTrailerKey,
 } from "./tmdb";
+import {
+  getCatalogNowPlaying,
+  getCatalogPopular,
+  getCatalogTrending,
+} from "./catalog";
 import { getLatestMovies, getLatestTvShows } from "./vidsrc";
 import { formatRuntime, formatYear } from "./utils";
 
@@ -49,39 +54,80 @@ async function buildSlide(id: number, type: MediaType): Promise<HeroSlide | null
   }
 }
 
-export async function getHeroSlides(limit = 3): Promise<HeroSlide[]> {
-  const [latestMovies, latestTv, nowPlaying, trending] = await Promise.all([
-    getLatestMovies(1).catch(() => ({ results: [] })),
-    getLatestTvShows(1).catch(() => ({ results: [] })),
-    getNowPlaying().catch(() => []),
-    getTrending("all").catch(() => []),
-  ]);
+export async function getHeroSlides(
+  limit = 3,
+  filter: WatchPlatformFilter = { providerId: null, region: "US" }
+): Promise<HeroSlide[]> {
+  return getHeroSlidesForMediaType("all", limit, filter);
+}
 
+export async function getHeroSlidesForMediaType(
+  mediaType: MediaType | "all",
+  limit = 3,
+  filter: WatchPlatformFilter = { providerId: null, region: "US" }
+): Promise<HeroSlide[]> {
   const pool: { id: number; type: MediaType }[] = [];
   const seen = new Set<number>();
 
   const add = (id: number, type: MediaType) => {
-    if (seen.has(id)) return;
+    if (Number.isNaN(id) || seen.has(id)) return;
+    if (mediaType !== "all" && type !== mediaType) return;
     seen.add(id);
     pool.push({ id, type });
   };
 
-  for (const item of latestMovies.results.slice(0, 4)) {
-    add(parseInt(item.tmdb_id, 10), "movie");
-  }
+  if (filter.providerId) {
+    if (mediaType === "movie" || mediaType === "all") {
+      const movies = await discoverByPlatform(
+        "movie",
+        filter.providerId,
+        filter.region
+      ).catch(() => []);
+      for (const item of movies.slice(0, 8)) add(item.id, "movie");
+    }
+    if (mediaType === "tv" || mediaType === "all") {
+      const tv = await discoverByPlatform("tv", filter.providerId, filter.region).catch(
+        () => []
+      );
+      for (const item of tv.slice(0, 8)) add(item.id, "tv");
+    }
+  } else {
+    const [latestMovies, latestTv, nowPlaying, trendingMovies, trendingTv] =
+      await Promise.all([
+        mediaType === "tv"
+          ? Promise.resolve({ results: [] })
+          : getLatestMovies(1).catch(() => ({ results: [] })),
+        mediaType === "movie"
+          ? Promise.resolve({ results: [] })
+          : getLatestTvShows(1).catch(() => ({ results: [] })),
+        mediaType === "tv"
+          ? Promise.resolve([])
+          : getCatalogNowPlaying(filter).catch(() => []),
+        mediaType === "tv"
+          ? Promise.resolve([])
+          : getCatalogTrending("movie", filter).catch(() => []),
+        mediaType === "movie"
+          ? Promise.resolve([])
+          : getCatalogTrending("tv", filter).catch(() => []),
+      ]);
 
-  for (const item of latestTv.results.slice(0, 2)) {
-    add(parseInt(item.tmdb_id, 10), "tv");
-  }
+    for (const item of latestMovies.results.slice(0, 4)) {
+      add(parseInt(item.tmdb_id, 10), "movie");
+    }
+    for (const item of latestTv.results.slice(0, 4)) {
+      add(parseInt(item.tmdb_id, 10), "tv");
+    }
+    for (const item of nowPlaying) add(item.id, "movie");
+    for (const item of trendingMovies) add(item.id, "movie");
+    for (const item of trendingTv) add(item.id, "tv");
 
-  for (const item of nowPlaying) {
-    add(item.id, "movie");
-  }
-
-  for (const item of trending) {
-    const type = item.media_type;
-    if (type === "movie" || type === "tv") {
-      add(item.id, type);
+    if (mediaType === "movie" || mediaType === "all") {
+      const popularMovies = await getCatalogPopular("movie", filter).catch(() => []);
+      for (const item of popularMovies) add(item.id, "movie");
+    }
+    if (mediaType === "tv" || mediaType === "all") {
+      const popularTv = await getCatalogPopular("tv", filter).catch(() => []);
+      for (const item of popularTv) add(item.id, "tv");
     }
   }
 

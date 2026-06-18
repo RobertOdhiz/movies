@@ -1,23 +1,32 @@
 import { AppShell } from "@/components/layout/AppShell";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { ContentRow } from "@/components/home/ContentRow";
-import { getNowPlaying, getPopular, getTrending } from "@/lib/tmdb";
-import { getLatestMovies } from "@/lib/vidsrc";
+import { PlatformFilterNotice } from "@/components/layout/PlatformFilterNotice";
+import {
+  getCatalogNowPlaying,
+  getCatalogPopular,
+  getCatalogTrending,
+} from "@/lib/catalog";
+import { getHeroSlidesForMediaType } from "@/lib/hero";
+import { getServerWatchPlatformFilter } from "@/lib/server-watch-platform";
 
 export const dynamic = "force-dynamic";
 
 export default async function MoviesPage() {
-  const [nowPlaying, popular, trending, latest] = await Promise.all([
-    getNowPlaying().catch(() => []),
-    getPopular("movie").catch(() => []),
-    getTrending("movie").catch(() => []),
-    getLatestMovies(1).catch(() => ({ results: [] })),
+  const filter = await getServerWatchPlatformFilter();
+
+  const [heroSlides, nowPlaying, popular, trending] = await Promise.all([
+    getHeroSlidesForMediaType("movie", 3, filter).catch(() => []),
+    getCatalogNowPlaying(filter).catch(() => []),
+    getCatalogPopular("movie", filter).catch(() => []),
+    getCatalogTrending("movie", filter).catch(() => []),
   ]);
 
   return (
     <AppShell>
-      <div className="px-4 pb-8">
-        <h1 className="mb-6 text-3xl font-bold text-white">Movies</h1>
-      </div>
+      <PlatformFilterNotice filter={filter} />
+      {heroSlides.length > 0 && <HeroCarousel slides={heroSlides} />}
+
       <ContentRow title="Now Playing" items={nowPlaying} mediaType="movie" />
       <ContentRow title="Trending Movies" items={trending} mediaType="movie" />
       <ContentRow title="Popular Movies" items={popular} mediaType="movie" />

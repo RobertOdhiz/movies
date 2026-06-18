@@ -25,3 +25,10 @@ export function formatYear(date: string | undefined): string {
   if (!date) return "";
   return date.split("-")[0];
 }
+
+export function clipWords(text: string | undefined, maxWords = 25): string {
+  if (!text?.trim()) return "";
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text.trim();
+  return `${words.slice(0, maxWords).join(" ")}…`;
+}

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -10,7 +9,9 @@ import {
   Bell,
   ChevronDown,
   Loader2,
+  Clapperboard,
 } from "lucide-react";
+import Link from "next/link";
 import { cn, tmdbImage } from "@/lib/utils";
 import type { TmdbSearchResult } from "@/lib/types";
 import { HelpPanel } from "./HelpPanel";
@@ -21,8 +22,33 @@ import {
 } from "./NotificationsPanel";
 import { ProfileMenu, useDisplayName, useProfileInitials } from "./ProfileMenu";
 import { Logo } from "./Logo";
+import {
+  PlatformFilterBadge,
+  PlatformFilterDropdown,
+} from "./PlatformFilterMenu";
 
-type Panel = "help" | "notifications" | "profile" | null;
+type Panel = "help" | "notifications" | "profile" | "platform" | null;
+
+type SpeechRecognitionInstance = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  onresult: ((event: { results: { [index: number]: { [index: number]: { transcript: string } } } }) => void) | null;
+};
+
+function getSpeechRecognition(): (new () => SpeechRecognitionInstance) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as Window & {
+    SpeechRecognition?: new () => SpeechRecognitionInstance;
+    webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
 
 export function TopNav() {
   const router = useRouter();
@@ -30,14 +56,26 @@ export function TopNav() {
   const [results, setResults] = useState<TmdbSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [listening, setListening] = useState(false);
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const unreadCount = useUnreadCount();
   const displayName = useDisplayName();
   const initials = useProfileInitials();
+
+  const goToSearchPage = useCallback(
+    (q: string) => {
+      const trimmed = q.trim();
+      if (!trimmed) return;
+      setSearchOpen(false);
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    },
+    [router]
+  );
 
   const search = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -65,12 +103,55 @@ export function TopNav() {
     debounceRef.current = setTimeout(() => search(value), 300);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    goToSearchPage(query);
+  };
+
   const handleSelect = (item: TmdbSearchResult) => {
     const type = item.media_type ?? "movie";
     const path = type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
     setQuery("");
     setSearchOpen(false);
     router.push(path);
+  };
+
+  const startVoiceSearch = () => {
+    const SpeechRecognitionCtor = getSpeechRecognition();
+    if (!SpeechRecognitionCtor) {
+      window.alert("Voice search is not supported in this browser.");
+      return;
+    }
+
+    if (listening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognitionCtor();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+    recognition.onerror = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript?.trim();
+      if (transcript) {
+        setQuery(transcript);
+        goToSearchPage(transcript);
+      }
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
   };
 
   const togglePanel = (panel: Panel) => {
@@ -100,11 +181,12 @@ export function TopNav() {
       if (e.key === "Escape") {
         setActivePanel(null);
         setSearchOpen(false);
+        if (listening) recognitionRef.current?.stop();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [listening]);
 
   return (
     <header className="fixed top-4 right-4 left-4 z-50">
@@ -112,7 +194,10 @@ export function TopNav() {
         <Logo />
 
         <div ref={searchRef} className="relative flex-1">
-          <div className="flex items-center gap-3 rounded-full bg-black/40 px-4 py-2">
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-3 rounded-full bg-black/40 px-4 py-2"
+          >
             {loading ? (
               <Loader2 size={18} className="shrink-0 animate-spin text-white/40" />
             ) : (
@@ -127,8 +212,20 @@ export function TopNav() {
               placeholder="Search movie or tv series"
               className="w-full bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
             />
-            <Mic size={18} className="shrink-0 cursor-pointer text-white/40 hover:text-white/70" />
-          </div>
+            <button
+              type="button"
+              onClick={startVoiceSearch}
+              aria-label={listening ? "Stop voice search" : "Voice search"}
+              className={cn(
+                "shrink-0 rounded-full p-0.5 transition-colors",
+                listening
+                  ? "text-accent animate-pulse"
+                  : "text-white/40 hover:text-white/70"
+              )}
+            >
+              <Mic size={18} />
+            </button>
+          </form>
 
           {searchOpen && results.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
@@ -138,6 +235,7 @@ export function TopNav() {
                 return (
                   <button
                     key={`${type}-${item.id}`}
+                    type="button"
                     onClick={() => handleSelect(item)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/10"
                   >
@@ -156,11 +254,47 @@ export function TopNav() {
                   </button>
                 );
               })}
+              {query.trim() && (
+                <Link
+                  href={`/search?q=${encodeURIComponent(query.trim())}`}
+                  onClick={() => setSearchOpen(false)}
+                  className="block border-t border-white/10 px-4 py-3 text-center text-sm font-medium text-accent transition-colors hover:bg-white/5"
+                >
+                  View all results for &ldquo;{query.trim()}&rdquo;
+                </Link>
+              )}
             </div>
           )}
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => togglePanel("platform")}
+              aria-label="Streaming platform filter"
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-2 py-1.5 transition-colors",
+                activePanel === "platform"
+                  ? "bg-accent/20 text-accent"
+                  : "text-white/50 hover:bg-white/10 hover:text-white"
+              )}
+            >
+              <Clapperboard size={18} />
+              <PlatformFilterBadge />
+              <ChevronDown
+                size={14}
+                className={cn(
+                  "hidden text-white/50 transition-transform sm:block",
+                  activePanel === "platform" && "rotate-180"
+                )}
+              />
+            </button>
+            {activePanel === "platform" && (
+              <PlatformFilterDropdown onClose={() => setActivePanel(null)} />
+            )}
+          </div>
+
           <div className="relative">
             <button
               type="button"

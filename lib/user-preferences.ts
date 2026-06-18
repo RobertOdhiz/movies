@@ -4,6 +4,8 @@ export interface UserPreferences {
   displayName: string;
   defaultProvider: StreamingProvider;
   notificationsReadAt: string | null;
+  watchPlatformId: number | null;
+  watchRegion: string;
 }
 
 const PREFS_KEY = "movies-user-prefs";
@@ -12,6 +14,8 @@ const defaults: UserPreferences = {
   displayName: "Guest",
   defaultProvider: "vidfast",
   notificationsReadAt: null,
+  watchPlatformId: null,
+  watchRegion: "US",
 };
 
 export function getUserPreferences(): UserPreferences {
@@ -25,11 +29,25 @@ export function getUserPreferences(): UserPreferences {
   }
 }
 
+import {
+  setWatchPlatformCookies,
+} from "@/lib/watch-platform";
+
 export function saveUserPreferences(prefs: Partial<UserPreferences>): UserPreferences {
   const current = getUserPreferences();
   const next = { ...current, ...prefs };
   localStorage.setItem(PREFS_KEY, JSON.stringify(next));
-  window.dispatchEvent(new CustomEvent("movies-prefs-change", { detail: next }));
+
+  if (
+    typeof document !== "undefined" &&
+    ("watchPlatformId" in prefs || "watchRegion" in prefs)
+  ) {
+    setWatchPlatformCookies(next.watchPlatformId, next.watchRegion);
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("movies-prefs-change", { detail: next }));
+  }
   return next;
 }
 

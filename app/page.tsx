@@ -1,19 +1,27 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { ContentRow } from "@/components/home/ContentRow";
-import { getTrending, getNowPlaying, getPopular } from "@/lib/tmdb";
+import { PlatformFilterNotice } from "@/components/layout/PlatformFilterNotice";
+import {
+  getCatalogNowPlaying,
+  getCatalogPopular,
+  getCatalogTrending,
+} from "@/lib/catalog";
 import { getHeroSlides } from "@/lib/hero";
+import { getServerWatchPlatformFilter } from "@/lib/server-watch-platform";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const filter = await getServerWatchPlatformFilter();
+
   const [heroSlides, trending, nowPlaying, popularMovies, popularTv] =
     await Promise.all([
-      getHeroSlides(3).catch(() => []),
-      getTrending("all").catch(() => []),
-      getNowPlaying().catch(() => []),
-      getPopular("movie").catch(() => []),
-      getPopular("tv").catch(() => []),
+      getHeroSlides(3, filter).catch(() => []),
+      getCatalogTrending("all", filter).catch(() => []),
+      getCatalogNowPlaying(filter).catch(() => []),
+      getCatalogPopular("movie", filter).catch(() => []),
+      getCatalogPopular("tv", filter).catch(() => []),
     ]);
 
   if (heroSlides.length === 0 && trending.length === 0) {
@@ -30,6 +38,7 @@ export default async function HomePage() {
 
   return (
     <AppShell>
+      <PlatformFilterNotice filter={filter} />
       <HeroCarousel slides={heroSlides} />
 
       <ContentRow

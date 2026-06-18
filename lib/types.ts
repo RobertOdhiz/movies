@@ -11,6 +11,7 @@ export interface TmdbSearchResult {
   vote_average: number;
   release_date?: string;
   first_air_date?: string;
+  genre_ids?: number[];
 }
 
 export interface TmdbMovieDetails {
@@ -104,6 +105,26 @@ export interface StreamResponse {
 }
 
 export type StreamingProvider = "vidfast" | "vidrock" | "vidsrc";
+
+export interface TmdbPersonDetails {
+  id: number;
+  name: string;
+  biography: string;
+  birthday: string | null;
+  place_of_birth: string | null;
+  profile_path: string | null;
+  known_for_department: string;
+}
+
+export interface TmdbPersonCredit {
+  id: number;
+  mediaType: MediaType;
+  title: string;
+  character: string;
+  posterPath: string | null;
+  releaseDate: string;
+  voteAverage: number;
+}
 
 export interface HeroSlide {
   id: number;

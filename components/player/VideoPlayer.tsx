@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { HlsPlayer } from "./HlsPlayer";
 import { EmbedPlayer } from "./EmbedPlayer";
 import { StreamSourceSelector } from "./StreamSourceSelector";
-import { getPrimaryEmbedUrl, getEmbedUrlByProvider } from "@/lib/providers";
-import { getUserPreferences } from "@/lib/user-preferences";
+import { getEmbedUrlByProvider } from "@/lib/providers";
+import { getUserPreferences, saveUserPreferences } from "@/lib/user-preferences";
 import type { MediaType, StreamSource, StreamingProvider } from "@/lib/types";
 
 interface VideoPlayerProps {
@@ -42,6 +42,12 @@ export function VideoPlayer({
   }, []);
 
   useEffect(() => {
+    if (sources.length === 0) return;
+    const providerSource = sources.find((s) => s.provider === selectedProvider);
+    setUseEmbed(!providerSource);
+  }, [selectedProvider, sources]);
+
+  useEffect(() => {
     async function loadStream() {
       setLoading(true);
       setError(null);
@@ -59,18 +65,32 @@ export function VideoPlayer({
 
         if (data.sources?.length > 0) {
           setSources(data.sources);
-          setUseEmbed(false);
+          const preferred = getUserPreferences().defaultProvider;
+          const providerSource = data.sources.find(
+            (s: StreamSource) => s.provider === preferred
+          );
+          setUseEmbed(!providerSource);
         } else if (data.embedFallback) {
           setEmbedFallback(data.embedFallback);
           setUseEmbed(true);
         } else {
-          const fallback = getPrimaryEmbedUrl({ tmdbId, type, season, episode });
+          const fallback = getEmbedUrlByProvider(getUserPreferences().defaultProvider, {
+            tmdbId,
+            type,
+            season,
+            episode,
+          });
           setEmbedFallback(fallback);
           setUseEmbed(true);
         }
       } catch {
         setError("Failed to load stream");
-        const fallback = getPrimaryEmbedUrl({ tmdbId, type, season, episode });
+        const fallback = getEmbedUrlByProvider(getUserPreferences().defaultProvider, {
+          tmdbId,
+          type,
+          season,
+          episode,
+        });
         setEmbedFallback(fallback);
         setUseEmbed(true);
       } finally {
@@ -135,12 +155,9 @@ export function VideoPlayer({
           selected={selectedProvider}
           onSelect={(provider) => {
             setSelectedProvider(provider);
+            saveUserPreferences({ defaultProvider: provider });
             const providerSource = sources.find((s) => s.provider === provider);
-            if (providerSource) {
-              setUseEmbed(false);
-            } else {
-              setUseEmbed(true);
-            }
+            setUseEmbed(!providerSource);
           }}
           className="w-full shrink-0 lg:w-44"
         />

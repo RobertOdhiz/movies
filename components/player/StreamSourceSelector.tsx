@@ -1,13 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { STREAMING_PROVIDERS } from "@/lib/streaming-providers";
 import type { StreamingProvider } from "@/lib/types";
-
-const providers: { id: StreamingProvider; name: string; label: string }[] = [
-  { id: "vidfast", name: "VidFast", label: "VidFast" },
-  { id: "vidrock", name: "VidRock", label: "VidRock" },
-  { id: "vidsrc", name: "VidSrc", label: "VidSrc" },
-];
 
 interface StreamSourceSelectorProps {
   selected: StreamingProvider;
@@ -23,11 +18,14 @@ export function StreamSourceSelector({
   return (
     <aside className={cn("flex flex-col gap-3", className)}>
       <p className="text-xs font-medium uppercase tracking-wider text-white/40">
-        Source
+        Network
+      </p>
+      <p className="text-[11px] leading-relaxed text-white/35">
+        Synced with your global preference in the nav bar.
       </p>
 
       <div className="flex flex-row gap-2 lg:flex-col">
-        {providers.map((p) => {
+        {STREAMING_PROVIDERS.map((p) => {
           const isActive = selected === p.id;
 
           return (

@@ -2,8 +2,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { HeroSection } from "@/components/home/HeroSection";
 import { CastSection } from "@/components/home/CastSection";
 import { ContentRow } from "@/components/home/ContentRow";
-import { getMovieDetails, getTrailerKey, getPopular } from "@/lib/tmdb";
+import { getMovieDetails, getTrailerKey } from "@/lib/tmdb";
+import { getCatalogPopular } from "@/lib/catalog";
 import { formatRuntime, formatYear } from "@/lib/utils";
+import { getServerWatchPlatformFilter } from "@/lib/server-watch-platform";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +27,8 @@ export default async function MoviePage({ params }: PageProps) {
     notFound();
   }
 
-  const similar = await getPopular("movie").catch(() => []);
+  const filter = await getServerWatchPlatformFilter();
+  const similar = await getCatalogPopular("movie", filter).catch(() => []);
 
   return (
     <AppShell>

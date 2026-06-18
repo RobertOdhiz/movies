@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef, useState } from "react";
-import { tmdbImage, formatYear } from "@/lib/utils";
+import { MediaCard } from "@/components/media/MediaCard";
+import { formatGenreIds } from "@/lib/genres";
+import { formatYear } from "@/lib/utils";
 import type { TmdbSearchResult } from "@/lib/types";
 
 interface ContentRowProps {
@@ -50,30 +51,24 @@ export function ContentRow({ title, items, mediaType }: ContentRowProps) {
           className="scrollbar-hide flex gap-3 overflow-x-auto pb-2"
         >
           {items.map((item) => {
-            const title = item.title ?? item.name ?? "Unknown";
+            const itemTitle = item.title ?? item.name ?? "Unknown";
             const type = mediaType ?? item.media_type ?? "movie";
             const href = type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
             const year = formatYear(item.release_date ?? item.first_air_date);
+            const genres = formatGenreIds(item.genre_ids, type);
 
             return (
-              <Link
+              <MediaCard
                 key={`${type}-${item.id}`}
                 href={href}
-                className="group/card w-36 shrink-0 transition-transform hover:scale-105"
-              >
-                <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-800">
-                  <img
-                    src={tmdbImage(item.poster_path, "w342")}
-                    alt={title}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity group-hover/card:opacity-100" />
-                  <div className="absolute bottom-2 left-2 right-2 opacity-0 transition-opacity group-hover/card:opacity-100">
-                    <p className="truncate text-xs font-medium text-white">{title}</p>
-                    <p className="text-xs text-white/60">{year}</p>
-                  </div>
-                </div>
-              </Link>
+                title={itemTitle}
+                posterPath={item.poster_path}
+                rating={item.vote_average}
+                overview={item.overview}
+                genres={genres}
+                year={year}
+                className="w-36 shrink-0"
+              />
             );
           })}
         </div>

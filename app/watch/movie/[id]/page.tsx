@@ -1,7 +1,9 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { WatchMovieExperience } from "@/components/watch/WatchMovieExperience";
-import { getMovieDetails, getPopular } from "@/lib/tmdb";
+import { getMovieDetails } from "@/lib/tmdb";
+import { getCatalogPopular } from "@/lib/catalog";
 import { notFound } from "next/navigation";
+import { getServerWatchPlatformFilter } from "@/lib/server-watch-platform";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +24,8 @@ export default async function WatchMoviePage({ params }: PageProps) {
     notFound();
   }
 
-  const similar = await getPopular("movie").catch(() => []);
+  const filter = await getServerWatchPlatformFilter();
+  const similar = await getCatalogPopular("movie", filter).catch(() => []);
 
   return (
     <AppShell>

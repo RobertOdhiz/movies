@@ -1,85 +1,53 @@
-"use client";
-
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { tmdbImage, formatYear } from "@/lib/utils";
-import type { TmdbSearchResult } from "@/lib/types";
+import { SearchResultsGrid } from "@/components/search/SearchResultsGrid";
+import { PlatformFilterNotice } from "@/components/layout/PlatformFilterNotice";
+import { searchCatalogPaginated } from "@/lib/catalog";
+import { getServerWatchPlatformFilter } from "@/lib/server-watch-platform";
 
-function SearchResults() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q") ?? "";
-  const [results, setResults] = useState<TmdbSearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-
-    setLoading(true);
-    fetch(`/api/search?q=${encodeURIComponent(query)}`)
-      .then((r) => r.json())
-      .then((d) => setResults(d.results ?? []))
-      .catch(() => setResults([]))
-      .finally(() => setLoading(false));
-  }, [query]);
-
-  if (!query) {
-    return (
-      <p className="text-white/50">Enter a search term to find movies and TV series.</p>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (results.length === 0) {
-    return <p className="text-white/50">No results found for &ldquo;{query}&rdquo;</p>;
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {results.map((item) => {
-        const title = item.title ?? item.name ?? "Unknown";
-        const type = item.media_type ?? "movie";
-        const href = type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
-
-        return (
-          <Link key={`${type}-${item.id}`} href={href} className="group">
-            <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-800">
-              <img
-                src={tmdbImage(item.poster_path, "w342")}
-                alt={title}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-              />
-            </div>
-            <p className="mt-2 truncate text-sm font-medium text-white">{title}</p>
-            <p className="text-xs text-white/50 capitalize">
-              {type} · {formatYear(item.release_date ?? item.first_air_date)}
-            </p>
-          </Link>
-        );
-      })}
-    </div>
-  );
+interface PageProps {
+  searchParams: Promise<{ q?: string; page?: string }>;
 }
 
-export default function SearchPage() {
+export default async function SearchPage({ searchParams }: PageProps) {
+  const { q, page: pageParam } = await searchParams;
+  const query = q?.trim() ?? "";
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const filter = await getServerWatchPlatformFilter();
+
+  const data = query
+    ? await searchCatalogPaginated(query, page, filter).catch(() => ({
+        results: [],
+        page: 1,
+        totalPages: 0,
+        totalResults: 0,
+      }))
+    : { results: [], page: 1, totalPages: 0, totalResults: 0 };
+
   return (
     <AppShell>
-      <div className="px-4 pb-8">
-        <h1 className="mb-6 text-3xl font-bold text-white">Search</h1>
-        <Suspense fallback={<div className="text-white/50">Loading...</div>}>
-          <SearchResults />
-        </Suspense>
+      <div className="mx-4 max-w-6xl pb-12">
+        <PlatformFilterNotice filter={filter} className="mb-4" />
+        <h1 className="mb-2 text-3xl font-bold text-white">Search</h1>
+        {query ? (
+          <>
+            <p className="mb-6 text-white/60">
+              Results for &ldquo;{query}&rdquo;
+            </p>
+            <SearchResultsGrid
+              query={query}
+              results={data.results}
+              page={data.page}
+              totalPages={data.totalPages}
+              totalResults={data.totalResults}
+            />
+          </>
+        ) : (
+          <p className="text-white/50">
+            Enter a search term to find movies and TV series.
+          </p>
+        )}
       </div>
     </AppShell>
   );

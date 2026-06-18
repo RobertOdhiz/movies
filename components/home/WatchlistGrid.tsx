@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Trash2 } from "lucide-react";
+import { MediaCard } from "@/components/media/MediaCard";
 import { getWatchlist, removeFromWatchlist, type WatchlistItem } from "@/lib/watchlist";
-import { tmdbImage } from "@/lib/utils";
 
 export function WatchlistGrid() {
   const [items, setItems] = useState<WatchlistItem[]>([]);
@@ -30,17 +29,14 @@ export function WatchlistGrid() {
         const href = item.type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
         return (
           <div key={`${item.type}-${item.id}`} className="group relative">
-            <Link href={href} className="block">
-              <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-800">
-                <img
-                  src={tmdbImage(item.posterPath, "w342")}
-                  alt={item.title}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
-              <p className="mt-2 truncate text-sm font-medium text-white">{item.title}</p>
-              <p className="text-xs capitalize text-white/50">{item.type}</p>
-            </Link>
+            <MediaCard
+              href={href}
+              title={item.title}
+              posterPath={item.posterPath}
+              badge={item.type}
+              showMetaBelow
+              subtitle={item.type}
+            />
             <button
               type="button"
               onClick={() => removeFromWatchlist(item.id, item.type)}

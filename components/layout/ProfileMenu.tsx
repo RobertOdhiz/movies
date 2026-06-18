@@ -9,19 +9,13 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   getInitials,
   getUserPreferences,
   saveUserPreferences,
-  type StreamingProvider,
 } from "@/lib/user-preferences";
-
-const providers: { id: StreamingProvider; label: string }[] = [
-  { id: "vidfast", label: "VidFast" },
-  { id: "vidrock", label: "VidRock" },
-  { id: "vidsrc", label: "VidSrc" },
-];
+import { StreamingSourcePicker } from "./StreamingSourceMenu";
+import { PlatformFilterPicker } from "./PlatformFilterMenu";
 
 interface ProfileMenuProps {
   onClose: () => void;
@@ -45,7 +39,7 @@ export function ProfileMenu({ onClose }: ProfileMenuProps) {
     setEditing(false);
   };
 
-  const setProvider = (provider: StreamingProvider) => {
+  const setProvider = (provider: typeof prefs.defaultProvider) => {
     const updated = saveUserPreferences({ defaultProvider: provider });
     setPrefs(updated);
   };
@@ -124,25 +118,22 @@ export function ProfileMenu({ onClose }: ProfileMenuProps) {
         <div className="px-3 py-2">
           <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
             <Settings size={12} />
-            Default source
+            Streaming platform
           </p>
-          <div className="flex flex-col gap-1">
-            {providers.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setProvider(p.id)}
-                className={cn(
-                  "rounded-xl px-3 py-2 text-left text-sm transition-all",
-                  prefs.defaultProvider === p.id
-                    ? "bg-accent font-semibold text-black"
-                    : "text-white/60 hover:bg-white/10 hover:text-white"
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+          <PlatformFilterPicker compact />
+        </div>
+
+        <div className="my-2 border-t border-white/10" />
+
+        <div className="px-3 py-2">
+          <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+            <Settings size={12} />
+            Playback source
+          </p>
+          <StreamingSourcePicker
+            selected={prefs.defaultProvider}
+            onSelect={setProvider}
+          />
         </div>
 
         <div className="my-2 border-t border-white/10" />
