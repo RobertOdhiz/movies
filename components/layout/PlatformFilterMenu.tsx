@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clapperboard, Globe } from "lucide-react";
+import { Clapperboard, Globe, LayoutGrid } from "lucide-react";
 import { cn, tmdbImage } from "@/lib/utils";
 import {
   DEFAULT_WATCH_REGION,
@@ -35,7 +35,7 @@ export function PlatformFilterPicker({
   useEffect(() => {
     const sync = () => {
       const prefs = getUserPreferences();
-      setSelectedId(prefs.watchPlatformId);
+      setSelectedId(prefs.watchPlatformId ?? null);
       setRegion(prefs.watchRegion);
     };
     sync();
@@ -100,20 +100,16 @@ export function PlatformFilterPicker({
         </select>
       </div>
 
-      <button
-        type="button"
-        onClick={() => apply(null)}
-        className={cn(
-          "rounded-xl px-3 py-2 text-left text-sm transition-all",
-          selectedId === null
-            ? "bg-accent font-semibold text-black"
-            : "text-white/60 hover:bg-white/10 hover:text-white"
-        )}
-      >
-        All platforms
-      </button>
-
       <div className="max-h-64 space-y-1 overflow-y-auto pr-1">
+        <PlatformOption
+          name="All"
+          logoPath={null}
+          icon={<LayoutGrid size={14} className="text-inherit" />}
+          active={selectedId == null}
+          onClick={() => apply(null)}
+          className="sticky top-0 z-10 bg-[#141414]/95 backdrop-blur-sm"
+        />
+
         {FEATURED_WATCH_PLATFORMS.map((platform) => {
           const logo = providers.find((p) => p.provider_id === platform.providerId)?.logo_path;
           return (
@@ -150,13 +146,17 @@ export function PlatformFilterPicker({
 function PlatformOption({
   name,
   logoPath,
+  icon,
   active,
   onClick,
+  className,
 }: {
   name: string;
   logoPath: string | null;
+  icon?: React.ReactNode;
   active: boolean;
   onClick: () => void;
+  className?: string;
 }) {
   return (
     <button
@@ -166,7 +166,8 @@ function PlatformOption({
         "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-all",
         active
           ? "bg-accent font-semibold text-black"
-          : "text-white/60 hover:bg-white/10 hover:text-white"
+          : "text-white/60 hover:bg-white/10 hover:text-white",
+        className
       )}
     >
       <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white/10">
@@ -176,6 +177,8 @@ function PlatformOption({
             alt=""
             className="h-full w-full object-cover"
           />
+        ) : icon ? (
+          <span className={active ? "text-black/70" : "text-white/50"}>{icon}</span>
         ) : (
           <Clapperboard size={14} className={active ? "text-black/60" : "text-white/40"} />
         )}
@@ -212,7 +215,8 @@ export function PlatformFilterBadge({ className }: { className?: string }) {
 
   useEffect(() => {
     const cookies = readWatchPlatformCookies();
-    if (cookies.providerId !== getUserPreferences().watchPlatformId) {
+    const prefs = getUserPreferences();
+    if (cookies.providerId !== (prefs.watchPlatformId ?? null)) {
       saveUserPreferences({
         watchPlatformId: cookies.providerId,
         watchRegion: cookies.region,

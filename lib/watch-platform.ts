@@ -21,10 +21,10 @@ export const FEATURED_WATCH_PLATFORMS: {
 ];
 
 export function getPlatformName(
-  providerId: number | null,
+  providerId: number | null | undefined,
   providers?: { provider_id: number; provider_name: string }[]
 ): string {
-  if (providerId === null) return "All platforms";
+  if (providerId == null) return "All";
   const featured = FEATURED_WATCH_PLATFORMS.find((p) => p.providerId === providerId);
   if (featured) return featured.name;
   return providers?.find((p) => p.provider_id === providerId)?.provider_name ?? "Platform";
