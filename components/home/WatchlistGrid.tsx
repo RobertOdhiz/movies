@@ -40,7 +40,7 @@ export function WatchlistGrid() {
             <button
               type="button"
               onClick={() => removeFromWatchlist(item.id, item.type)}
-              className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-red-500/80 group-hover:opacity-100"
+              className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white opacity-100 transition-opacity hover:bg-red-500/80 sm:opacity-0 sm:group-hover:opacity-100"
               aria-label={`Remove ${item.title} from watchlist`}
             >
               <Trash2 size={14} />

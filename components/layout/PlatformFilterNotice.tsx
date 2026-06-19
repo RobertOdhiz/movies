@@ -26,7 +26,7 @@ export function PlatformFilterNotice({
   return (
     <div
       className={cn(
-        "mx-4 mb-4 rounded-2xl border border-accent/20 bg-accent/10 px-4 py-2.5 text-sm text-accent/90",
+        "mb-4 rounded-2xl border border-accent/20 bg-accent/10 px-3 py-2.5 text-xs text-accent/90 sm:px-4 sm:text-sm",
         className
       )}
     >

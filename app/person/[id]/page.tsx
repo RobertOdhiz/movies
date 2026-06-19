@@ -41,7 +41,7 @@ export default async function PersonPage({ params, searchParams }: PageProps) {
 
   return (
     <AppShell>
-      <div className="mx-4 max-w-6xl pb-12 pt-2">
+      <div className="mx-auto max-w-6xl pb-12 pt-2">
         <Link
           href="/"
           className="mb-6 inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"
@@ -60,7 +60,7 @@ export default async function PersonPage({ params, searchParams }: PageProps) {
           </div>
 
           <div className="min-w-0 flex-1 text-center sm:text-left">
-            <h1 className="text-3xl font-bold text-white">{person.name}</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">{person.name}</h1>
             {person.known_for_department && (
               <p className="mt-1 text-sm text-accent">{person.known_for_department}</p>
             )}

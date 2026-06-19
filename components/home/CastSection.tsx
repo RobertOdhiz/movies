@@ -9,16 +9,16 @@ export function CastSection({ cast }: CastSectionProps) {
   if (!cast.length) return null;
 
   return (
-    <section className="mb-8 px-4">
-      <h2 className="mb-4 text-lg font-semibold text-white">Cast</h2>
-      <div className="flex flex-wrap gap-x-4 gap-y-6">
+    <section className="mb-8">
+      <h2 className="mb-4 text-base font-semibold text-white sm:text-lg">Cast</h2>
+      <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-6">
         {cast.slice(0, 15).map((person) => (
           <Link
             key={person.id}
             href={`/person/${person.id}`}
-            className="group w-24 text-center transition-transform hover:scale-105"
+            className="group w-20 text-center transition-transform hover:scale-105 sm:w-24"
           >
-            <div className="mx-auto mb-2 h-24 w-24 overflow-hidden rounded-full bg-zinc-800 ring-2 ring-transparent transition-all group-hover:ring-accent/50">
+            <div className="mx-auto mb-2 h-20 w-20 overflow-hidden rounded-full bg-zinc-800 ring-2 ring-transparent transition-all group-hover:ring-accent/50 sm:h-24 sm:w-24">
               <img
                 src={tmdbImage(person.profile_path, "w185")}
                 alt={person.name}

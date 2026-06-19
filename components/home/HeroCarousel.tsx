@@ -99,8 +99,8 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
 
   return (
     <>
-      <div className="relative mx-4 mb-8 overflow-hidden rounded-3xl">
-        <div className="relative min-h-[520px]">
+      <div className="relative -mx-3 mb-6 overflow-hidden rounded-none sm:mx-0 sm:mb-8 sm:rounded-3xl md:mx-0">
+        <div className="relative min-h-[380px] sm:min-h-[460px] md:min-h-[520px]">
           {transitioning ? (
             <>
               <div className={cn("absolute inset-0 z-0", outClass)}>
@@ -124,7 +124,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               onClick={prev}
               disabled={transitioning}
               aria-label="Previous featured title"
-              className="pointer-events-auto absolute left-6 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 hover:scale-105 disabled:opacity-40"
+              className="pointer-events-auto absolute left-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 hover:scale-105 disabled:opacity-40 sm:left-4 sm:h-11 sm:w-11 md:left-6"
             >
               <ChevronLeft size={22} />
             </button>
@@ -134,12 +134,12 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               onClick={next}
               disabled={transitioning}
               aria-label="Next featured title"
-              className="pointer-events-auto absolute right-6 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 hover:scale-105 disabled:opacity-40"
+              className="pointer-events-auto absolute right-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 hover:scale-105 disabled:opacity-40 sm:right-4 sm:h-11 sm:w-11 md:right-6"
             >
               <ChevronRight size={22} />
             </button>
 
-            <div className="pointer-events-auto absolute bottom-8 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+            <div className="pointer-events-auto absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 gap-2 sm:bottom-8">
               {slides.map((s, i) => (
                 <button
                   key={s.id}

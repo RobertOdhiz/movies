@@ -27,9 +27,9 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
   return (
     <AppShell>
-      <div className="mx-4 max-w-6xl pb-12">
+      <div className="mx-auto max-w-6xl pb-12">
         <PlatformFilterNotice filter={filter} className="mb-4" />
-        <h1 className="mb-2 text-3xl font-bold text-white">Search</h1>
+        <h1 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Search</h1>
         {query ? (
           <>
             <p className="mb-6 text-white/60">

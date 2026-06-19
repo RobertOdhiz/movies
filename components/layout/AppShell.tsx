@@ -5,11 +5,11 @@ import { WatchPlatformSync } from "./WatchPlatformSync";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-dvh flex-col">
       <WatchPlatformSync />
       <Sidebar />
       <TopNav />
-      <main className="flex-1 pl-20 pt-24">{children}</main>
+      <main className="app-main flex-1">{children}</main>
       <Footer />
     </div>
   );

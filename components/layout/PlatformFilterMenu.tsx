@@ -15,6 +15,7 @@ import {
   saveUserPreferences,
 } from "@/lib/user-preferences";
 import type { TmdbWatchProviderOption } from "@/lib/tmdb";
+import { navDropdownPanelClass } from "@/lib/nav-dropdown";
 
 interface PlatformFilterPickerProps {
   onSelect?: () => void;
@@ -190,7 +191,7 @@ function PlatformOption({
 
 export function PlatformFilterDropdown({ onClose }: { onClose?: () => void }) {
   return (
-    <div className="absolute top-full right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/95 p-3 shadow-2xl backdrop-blur-xl">
+    <div className={cn(navDropdownPanelClass("sm:w-72"), "p-3")}>
       <p className="mb-2 flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-wider text-white/40">
         <Clapperboard size={12} />
         Streaming platform

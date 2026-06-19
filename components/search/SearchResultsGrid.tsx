@@ -63,7 +63,7 @@ export function SearchResultsGrid({
 
       {totalPages > 1 && (
         <nav
-          className="mt-8 flex items-center justify-center gap-2"
+          className="mt-8 flex flex-wrap items-center justify-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
           aria-label="Search pagination"
         >
           <Link

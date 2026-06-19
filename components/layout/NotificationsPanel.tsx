@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Film, Sparkles, Tv } from "lucide-react";
+import { navDropdownPanelClass } from "@/lib/nav-dropdown";
 
 interface Notification {
   id: string;
@@ -45,7 +46,7 @@ export function NotificationsPanel({ onClose, onMarkRead }: NotificationsPanelPr
   };
 
   return (
-    <div className="absolute top-full right-0 mt-2 w-96 overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
+    <div className={navDropdownPanelClass("sm:w-96")}>
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <div>
           <p className="text-sm font-semibold text-white">Notifications</p>

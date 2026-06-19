@@ -44,7 +44,7 @@ export function PersonFilmography({
 
   return (
     <section>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold text-white">
           Filmography
           <span className="ml-2 text-sm font-normal text-white/50">
@@ -52,13 +52,13 @@ export function PersonFilmography({
           </span>
         </h2>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {filters.map(({ value, label }) => (
             <Link
               key={value}
               href={buildHref(personId, 1, value)}
               className={cn(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 filter === value
                   ? "bg-accent text-black"
                   : "bg-white/10 text-white/70 hover:bg-white/15 hover:text-white"
@@ -99,7 +99,7 @@ export function PersonFilmography({
 
       {totalPages > 1 && (
         <nav
-          className="mt-8 flex items-center justify-center gap-2"
+          className="mt-8 flex flex-wrap items-center justify-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
           aria-label="Pagination"
         >
           <Link

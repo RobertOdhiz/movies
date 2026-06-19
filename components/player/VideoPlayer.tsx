@@ -110,7 +110,8 @@ export function VideoPlayer({
     episode,
   });
 
-  const playerClass = "h-[70vh] min-h-[420px] w-full rounded-2xl";
+  const playerClass =
+    "h-[42vh] min-h-[220px] w-full rounded-xl sm:h-[50vh] sm:min-h-[280px] sm:rounded-2xl md:h-[60vh] lg:h-[70vh] lg:min-h-[420px]";
 
   if (loading) {
     return (

@@ -16,6 +16,7 @@ import {
 } from "@/lib/user-preferences";
 import { StreamingSourcePicker } from "./StreamingSourceMenu";
 import { PlatformFilterPicker } from "./PlatformFilterMenu";
+import { navDropdownPanelClass } from "@/lib/nav-dropdown";
 
 interface ProfileMenuProps {
   onClose: () => void;
@@ -50,7 +51,7 @@ export function ProfileMenu({ onClose }: ProfileMenuProps) {
   ];
 
   return (
-    <div className="absolute top-full right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
+    <div className={navDropdownPanelClass("sm:w-72")}>
       <div className="border-b border-white/10 p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent to-orange-400 text-sm font-bold text-black">

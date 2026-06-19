@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { cn, tmdbImage } from "@/lib/utils";
+import { useVisibleEpisodeCount } from "@/lib/use-media-query";
 import type { TmdbEpisode } from "@/lib/types";
 
 interface EpisodeCarouselProps {
@@ -28,8 +29,12 @@ export function EpisodeCarousel({
   mediaId,
 }: EpisodeCarouselProps) {
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const visibleCount = 5;
+  const visibleCount = useVisibleEpisodeCount();
   const maxIndex = Math.max(0, episodes.length - visibleCount);
+
+  useEffect(() => {
+    setCarouselIndex((index) => Math.min(index, maxIndex));
+  }, [maxIndex, visibleCount]);
 
   const seasonOptions =
     availableSeasons ??
@@ -60,18 +65,18 @@ export function EpisodeCarousel({
         </div>
       </div>
 
-      <div className="relative flex items-center gap-2">
+      <div className="relative flex items-center gap-1 sm:gap-2">
         <button
           type="button"
           onClick={() => setCarouselIndex(Math.max(0, carouselIndex - 1))}
           disabled={carouselIndex === 0}
           aria-label="Previous episodes"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 disabled:opacity-25"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 disabled:opacity-25 sm:h-10 sm:w-10"
         >
           <ChevronLeft size={20} />
         </button>
 
-        <div className="flex min-w-0 flex-1 gap-4 overflow-hidden">
+        <div className="flex min-w-0 flex-1 gap-2 overflow-hidden sm:gap-4">
           {episodes.slice(carouselIndex, carouselIndex + visibleCount).map((ep) => {
             const isSelected = selectedEpisode === ep.episode_number;
             const watchHref = `/watch/tv/${mediaId}?season=${ep.season_number}&episode=${ep.episode_number}`;
@@ -106,7 +111,7 @@ export function EpisodeCarousel({
                   <p className="text-xs font-medium text-accent">
                     S{ep.season_number}-E{ep.episode_number}
                   </p>
-                  <p className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug text-white">
+                  <p className="mt-0.5 line-clamp-2 text-xs font-medium leading-snug text-white sm:text-sm">
                     {ep.name}
                   </p>
                 </div>
@@ -120,7 +125,7 @@ export function EpisodeCarousel({
           onClick={() => setCarouselIndex(Math.min(maxIndex, carouselIndex + 1))}
           disabled={carouselIndex >= maxIndex}
           aria-label="Next episodes"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 disabled:opacity-25"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70 disabled:opacity-25 sm:h-10 sm:w-10"
         >
           <ChevronRight size={20} />
         </button>

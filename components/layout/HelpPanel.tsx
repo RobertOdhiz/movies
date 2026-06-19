@@ -1,6 +1,7 @@
 "use client";
 
 import { Keyboard, Play, Search, Volume2 } from "lucide-react";
+import { navDropdownPanelClass } from "@/lib/nav-dropdown";
 
 const tips = [
   {
@@ -31,7 +32,7 @@ interface HelpPanelProps {
 
 export function HelpPanel({ onClose }: HelpPanelProps) {
   return (
-    <div className="absolute top-full right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
+    <div className={navDropdownPanelClass("sm:w-80")}>
       <div className="border-b border-white/10 px-4 py-3">
         <p className="text-sm font-semibold text-white">Help & tips</p>
         <p className="text-xs text-white/40">Get the most out of movies</p>

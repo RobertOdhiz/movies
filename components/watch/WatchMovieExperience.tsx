@@ -18,7 +18,7 @@ interface WatchMovieExperienceProps {
 
 export function WatchMovieExperience({ movie, similar }: WatchMovieExperienceProps) {
   return (
-    <div className="mx-4 pb-12">
+    <div className="pb-12">
       <Link
         href={`/movie/${movie.id}`}
         className="mb-4 inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"

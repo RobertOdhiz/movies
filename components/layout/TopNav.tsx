@@ -189,14 +189,123 @@ export function TopNav() {
   }, [listening]);
 
   return (
-    <header className="fixed top-4 right-4 left-4 z-50">
-      <div ref={navRef} className="glass-pill mx-auto flex max-w-6xl items-center gap-4 px-5 py-2.5">
-        <Logo />
+    <header className="fixed left-2 right-2 top-2 z-50 sm:left-4 sm:right-4 sm:top-4">
+      <div
+        ref={navRef}
+        className="glass-pill mx-auto flex max-w-6xl flex-col gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 md:flex-row md:items-center md:gap-4 md:px-5"
+      >
+        <div className="flex items-center justify-between gap-2 md:contents">
+          <Logo />
 
-        <div ref={searchRef} className="relative flex-1">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1 md:order-last">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => togglePanel("platform")}
+                aria-label="Streaming platform filter"
+                className={cn(
+                  "flex items-center gap-1 rounded-full px-1.5 py-1.5 transition-colors sm:gap-1.5 sm:px-2",
+                  activePanel === "platform"
+                    ? "bg-accent/20 text-accent"
+                    : "text-white/50 hover:bg-white/10 hover:text-white"
+                )}
+              >
+                <Clapperboard size={18} />
+                <PlatformFilterBadge />
+                <ChevronDown
+                  size={14}
+                  className={cn(
+                    "hidden text-white/50 transition-transform sm:block",
+                    activePanel === "platform" && "rotate-180"
+                  )}
+                />
+              </button>
+              {activePanel === "platform" && (
+                <PlatformFilterDropdown onClose={() => setActivePanel(null)} />
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => togglePanel("help")}
+                aria-label="Help"
+                className={cn(
+                  "rounded-full p-2 transition-colors",
+                  activePanel === "help"
+                    ? "bg-accent/20 text-accent"
+                    : "text-white/50 hover:bg-white/10 hover:text-white"
+                )}
+              >
+                <HelpCircle size={20} />
+              </button>
+              {activePanel === "help" && (
+                <HelpPanel onClose={() => setActivePanel(null)} />
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => togglePanel("notifications")}
+                aria-label="Notifications"
+                className={cn(
+                  "relative rounded-full p-2 transition-colors",
+                  activePanel === "notifications"
+                    ? "bg-accent/20 text-accent"
+                    : "text-white/50 hover:bg-white/10 hover:text-white"
+                )}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-black">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              {activePanel === "notifications" && (
+                <NotificationsPanel
+                  onClose={() => setActivePanel(null)}
+                  onMarkRead={markNotificationsRead}
+                />
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => togglePanel("profile")}
+                aria-label="Profile menu"
+                className={cn(
+                  "flex items-center gap-1 rounded-full py-1 pl-1 pr-1 transition-colors sm:pr-2",
+                  activePanel === "profile" ? "bg-white/15" : "hover:bg-white/10"
+                )}
+              >
+                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-accent/80 to-orange-500">
+                  <span className="text-xs font-bold text-black">{initials}</span>
+                </div>
+                <span className="hidden max-w-[100px] truncate text-sm text-white/80 lg:block">
+                  {displayName}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={cn(
+                    "hidden text-white/50 transition-transform sm:block",
+                    activePanel === "profile" && "rotate-180"
+                  )}
+                />
+              </button>
+              {activePanel === "profile" && (
+                <ProfileMenu onClose={() => setActivePanel(null)} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div ref={searchRef} className="relative w-full min-w-0 md:flex-1">
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-3 rounded-full bg-black/40 px-4 py-2"
+            className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-2 sm:gap-3 sm:px-4"
           >
             {loading ? (
               <Loader2 size={18} className="shrink-0 animate-spin text-white/40" />
@@ -209,8 +318,8 @@ export function TopNav() {
               value={query}
               onChange={(e) => handleChange(e.target.value)}
               onFocus={() => results.length > 0 && setSearchOpen(true)}
-              placeholder="Search movie or tv series"
-              className="w-full bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+              placeholder="Search movies & TV"
+              className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
             />
             <button
               type="button"
@@ -228,7 +337,7 @@ export function TopNav() {
           </form>
 
           {searchOpen && results.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
+            <div className="absolute top-full left-0 right-0 z-50 mt-2 max-h-[min(60dvh,24rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
               {results.slice(0, 8).map((item) => {
                 const title = item.title ?? item.name ?? "Unknown";
                 const type = item.media_type ?? "movie";
@@ -242,13 +351,13 @@ export function TopNav() {
                     <img
                       src={tmdbImage(item.poster_path, "w92")}
                       alt={title}
-                      className="h-12 w-8 rounded object-cover"
+                      className="h-12 w-8 shrink-0 rounded object-cover"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-white">{title}</p>
-                      <p className="text-xs text-white/50 capitalize">{type}</p>
+                      <p className="text-xs capitalize text-white/50">{type}</p>
                     </div>
-                    <span className="text-xs text-accent">
+                    <span className="shrink-0 text-xs text-accent">
                       {item.vote_average.toFixed(1)}
                     </span>
                   </button>
@@ -265,111 +374,6 @@ export function TopNav() {
               )}
             </div>
           )}
-        </div>
-
-        <div className="flex shrink-0 items-center gap-1">
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => togglePanel("platform")}
-              aria-label="Streaming platform filter"
-              className={cn(
-                "flex items-center gap-1.5 rounded-full px-2 py-1.5 transition-colors",
-                activePanel === "platform"
-                  ? "bg-accent/20 text-accent"
-                  : "text-white/50 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <Clapperboard size={18} />
-              <PlatformFilterBadge />
-              <ChevronDown
-                size={14}
-                className={cn(
-                  "hidden text-white/50 transition-transform sm:block",
-                  activePanel === "platform" && "rotate-180"
-                )}
-              />
-            </button>
-            {activePanel === "platform" && (
-              <PlatformFilterDropdown onClose={() => setActivePanel(null)} />
-            )}
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => togglePanel("help")}
-              aria-label="Help"
-              className={cn(
-                "rounded-full p-2 transition-colors",
-                activePanel === "help"
-                  ? "bg-accent/20 text-accent"
-                  : "text-white/50 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <HelpCircle size={20} />
-            </button>
-            {activePanel === "help" && (
-              <HelpPanel onClose={() => setActivePanel(null)} />
-            )}
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => togglePanel("notifications")}
-              aria-label="Notifications"
-              className={cn(
-                "relative rounded-full p-2 transition-colors",
-                activePanel === "notifications"
-                  ? "bg-accent/20 text-accent"
-                  : "text-white/50 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-black">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-            {activePanel === "notifications" && (
-              <NotificationsPanel
-                onClose={() => setActivePanel(null)}
-                onMarkRead={markNotificationsRead}
-              />
-            )}
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => togglePanel("profile")}
-              className={cn(
-                "flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors",
-                activePanel === "profile"
-                  ? "bg-white/15"
-                  : "hover:bg-white/10"
-              )}
-            >
-              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-accent/80 to-orange-500">
-                <span className="text-xs font-bold text-black">{initials}</span>
-              </div>
-              <span className="hidden max-w-[100px] truncate text-sm text-white/80 md:block">
-                {displayName}
-              </span>
-              <ChevronDown
-                size={16}
-                className={cn(
-                  "text-white/50 transition-transform",
-                  activePanel === "profile" && "rotate-180"
-                )}
-              />
-            </button>
-            {activePanel === "profile" && (
-              <ProfileMenu onClose={() => setActivePanel(null)} />
-            )}
-          </div>
         </div>
       </div>
     </header>

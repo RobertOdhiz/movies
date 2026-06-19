@@ -122,7 +122,9 @@ export function HeroSection({
       <div
         className={cn(
           "relative w-full",
-          episodes && episodes.length > 0 ? "min-h-[680px]" : "min-h-[520px]"
+          episodes && episodes.length > 0
+            ? "min-h-[480px] sm:min-h-[560px] md:min-h-[680px]"
+            : "min-h-[380px] sm:min-h-[460px] md:min-h-[520px]"
         )}
       >
         {showTrailer && trailerKey ? (
@@ -154,7 +156,7 @@ export function HeroSection({
             muted={trailerMuted}
             onToggle={toggleTrailerMute}
             className={cn(
-              "absolute bottom-6 right-6 z-30 transition-all duration-700 ease-in-out",
+              "absolute bottom-4 right-4 z-30 transition-all duration-700 ease-in-out sm:bottom-6 sm:right-6",
               isMinimal && "scale-110"
             )}
           />
@@ -163,24 +165,24 @@ export function HeroSection({
         {showTrailer && (
           <h1
             className={cn(
-              "pointer-events-none absolute bottom-6 left-10 z-30 max-w-[60%] font-bold text-white drop-shadow-lg transition-all duration-700 ease-in-out",
+              "pointer-events-none absolute bottom-4 left-4 z-30 max-w-[85%] font-bold text-white drop-shadow-lg transition-all duration-700 ease-in-out sm:bottom-6 sm:left-6 sm:max-w-[70%] md:left-10",
               isMinimal
-                ? "translate-y-0 text-2xl tracking-tight opacity-100"
-                : "translate-y-4 text-2xl opacity-0"
+                ? "translate-y-0 text-lg opacity-100 sm:text-2xl"
+                : "translate-y-4 text-lg opacity-0 sm:text-2xl"
             )}
           >
             {title}
           </h1>
         )}
 
-        <div className="pointer-events-none relative z-10 flex min-h-[inherit] flex-col justify-end p-10 pb-8">
+        <div className="pointer-events-none relative z-10 flex min-h-[inherit] flex-col justify-end p-4 pb-16 sm:p-6 sm:pb-14 md:p-10 md:pb-8">
           <div
             className={cn(
               "pointer-events-auto max-w-2xl transition-all duration-700 ease-in-out",
               isMinimal && "pointer-events-none translate-y-8 opacity-0"
             )}
           >
-            <h1 className="mb-3 text-5xl font-bold tracking-tight text-white drop-shadow-lg">
+            <h1 className="mb-2 text-2xl font-bold tracking-tight text-white drop-shadow-lg sm:mb-3 sm:text-3xl md:text-5xl">
               {title}
             </h1>
 
@@ -215,10 +217,10 @@ export function HeroSection({
               ))}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               <Link
                 href={watchUrl}
-                className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-white/90"
+                className="flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-white/90 sm:px-6"
               >
                 <Play size={16} fill="currentColor" />
                 Watch Now

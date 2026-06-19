@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { cn, clipWords, tmdbImage } from "@/lib/utils";
+import { useCanHoverPreview } from "@/lib/use-media-query";
 
 const PREVIEW_WIDTH = 280;
 const PREVIEW_GAP = 12;
@@ -40,6 +41,7 @@ export function MediaCard({
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
+  const canHoverPreview = useCanHoverPreview();
 
   useEffect(() => setMounted(true), []);
 
@@ -71,6 +73,7 @@ export function MediaCard({
   }, []);
 
   const showPreview = () => {
+    if (!canHoverPreview) return;
     updatePosition();
     setVisible(true);
   };

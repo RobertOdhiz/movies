@@ -32,7 +32,8 @@ export default async function MoviePage({ params }: PageProps) {
 
   return (
     <AppShell>
-      <HeroSection
+      <div className="-mx-3 mb-6 overflow-hidden rounded-none sm:mx-0 sm:rounded-3xl">
+        <HeroSection
         title={movie.title}
         overview={movie.overview}
         backdropPath={movie.backdrop_path}
@@ -44,7 +45,8 @@ export default async function MoviePage({ params }: PageProps) {
         trailerKey={getTrailerKey(movie.videos)}
         mediaType="movie"
         mediaId={movie.id}
-      />
+        />
+      </div>
 
       <CastSection cast={movie.credits?.cast ?? []} />
 

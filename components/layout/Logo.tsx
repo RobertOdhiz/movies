@@ -13,7 +13,7 @@ export function Logo() {
   return (
     <Link
       href="/"
-      className="group shrink-0 text-xl font-bold tracking-[0.18em]"
+      className="group shrink-0 text-base font-bold tracking-[0.12em] sm:text-xl sm:tracking-[0.18em]"
       aria-label="MOVIES home"
     >
       {letters.map(({ char, color }, i) => (

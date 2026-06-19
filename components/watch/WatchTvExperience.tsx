@@ -34,7 +34,7 @@ export function WatchTvExperience({
     : show.name;
 
   return (
-    <div className="mx-4 pb-12">
+    <div className="pb-12">
       <Link
         href={`/tv/${show.id}?season=${season}&episode=${episode}`}
         className="mb-4 inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"

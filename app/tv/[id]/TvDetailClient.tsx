@@ -71,27 +71,29 @@ export function TvDetailClient({ tvId }: TvDetailClientProps) {
 
   return (
     <AppShell>
-      <HeroSection
-        title={show.name}
-        overview={show.overview}
-        backdropPath={show.backdrop_path}
-        posterPath={show.poster_path}
-        rating={show.vote_average}
-        year={formatYear(show.first_air_date)}
-        seasons={show.number_of_seasons}
-        availableSeasons={show.seasons
-          .filter((s) => s.season_number > 0)
-          .map((s) => s.season_number)}
-        genres={show.genres.map((g) => g.name)}
-        trailerKey={getTrailerKey(show.videos)}
-        mediaType="tv"
-        mediaId={show.id}
-        episodes={episodes}
-        selectedSeason={season}
-        onSeasonChange={setSeason}
-        selectedEpisode={episode}
-        onEpisodeSelect={setEpisode}
-      />
+      <div className="-mx-3 mb-6 overflow-hidden rounded-none sm:mx-0 sm:rounded-3xl">
+        <HeroSection
+          title={show.name}
+          overview={show.overview}
+          backdropPath={show.backdrop_path}
+          posterPath={show.poster_path}
+          rating={show.vote_average}
+          year={formatYear(show.first_air_date)}
+          seasons={show.number_of_seasons}
+          availableSeasons={show.seasons
+            .filter((s) => s.season_number > 0)
+            .map((s) => s.season_number)}
+          genres={show.genres.map((g) => g.name)}
+          trailerKey={getTrailerKey(show.videos)}
+          mediaType="tv"
+          mediaId={show.id}
+          episodes={episodes}
+          selectedSeason={season}
+          onSeasonChange={setSeason}
+          selectedEpisode={episode}
+          onEpisodeSelect={setEpisode}
+        />
+      </div>
 
       <CastSection cast={show.credits?.cast ?? []} />
 

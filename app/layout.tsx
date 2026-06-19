@@ -18,6 +18,12 @@ export const metadata: Metadata = {
   description: "Watch movies and TV series with a premium streaming experience",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

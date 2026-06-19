@@ -33,13 +33,13 @@ export function ContentRow({ title, items, mediaType }: ContentRowProps) {
   };
 
   return (
-    <section className="mb-8 px-4">
-      <h2 className="mb-4 text-lg font-semibold text-white">{title}</h2>
+    <section className="mb-8">
+      <h2 className="mb-4 text-base font-semibold text-white sm:text-lg">{title}</h2>
       <div className="group/row relative">
         {canScrollLeft && (
           <button
             onClick={() => scroll("left")}
-            className="absolute -left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition-opacity group-hover/row:opacity-100"
+            className="absolute -left-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white opacity-100 sm:-left-2 sm:h-10 sm:w-10 md:opacity-0 md:group-hover/row:opacity-100"
           >
             <ChevronLeft size={20} />
           </button>
@@ -67,7 +67,7 @@ export function ContentRow({ title, items, mediaType }: ContentRowProps) {
                 overview={item.overview}
                 genres={genres}
                 year={year}
-                className="w-36 shrink-0"
+                className="w-28 shrink-0 sm:w-32 md:w-36"
               />
             );
           })}
@@ -76,7 +76,7 @@ export function ContentRow({ title, items, mediaType }: ContentRowProps) {
         {canScrollRight && (
           <button
             onClick={() => scroll("right")}
-            className="absolute -right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition-opacity group-hover/row:opacity-100"
+            className="absolute -right-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white opacity-100 sm:-right-2 sm:h-10 sm:w-10 md:opacity-0 md:group-hover/row:opacity-100"
           >
             <ChevronRight size={20} />
           </button>
