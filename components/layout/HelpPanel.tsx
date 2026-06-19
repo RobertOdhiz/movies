@@ -3,7 +3,7 @@
 import { Keyboard, Play, Search, Volume2 } from "lucide-react";
 import { navDropdownPanelClass } from "@/lib/nav-dropdown";
 
-const tips = [
+export const HELP_TIPS = [
   {
     icon: Search,
     title: "Search anything",
@@ -39,7 +39,7 @@ export function HelpPanel({ onClose }: HelpPanelProps) {
       </div>
 
       <div className="max-h-80 overflow-y-auto p-2">
-        {tips.map((tip) => (
+        {HELP_TIPS.map((tip) => (
           <div
             key={tip.title}
             className="flex gap-3 rounded-xl p-3 transition-colors hover:bg-white/5"

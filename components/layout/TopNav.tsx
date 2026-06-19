@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Search,
   Mic,
@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Loader2,
   Clapperboard,
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { cn, tmdbImage } from "@/lib/utils";
@@ -22,6 +23,7 @@ import {
 } from "./NotificationsPanel";
 import { ProfileMenu, useDisplayName, useProfileInitials } from "./ProfileMenu";
 import { Logo } from "./Logo";
+import { MobileNavDrawer } from "./MobileNavDrawer";
 import {
   PlatformFilterBadge,
   PlatformFilterDropdown,
@@ -52,11 +54,13 @@ function getSpeechRecognition(): (new () => SpeechRecognitionInstance) | null {
 
 export function TopNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TmdbSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [listening, setListening] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -72,6 +76,7 @@ export function TopNav() {
       const trimmed = q.trim();
       if (!trimmed) return;
       setSearchOpen(false);
+      setMobileMenuOpen(false);
       router.push(`/search?q=${encodeURIComponent(trimmed)}`);
     },
     [router]
@@ -113,6 +118,7 @@ export function TopNav() {
     const path = type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
     setQuery("");
     setSearchOpen(false);
+    setMobileMenuOpen(false);
     router.push(path);
   };
 
@@ -157,7 +163,14 @@ export function TopNav() {
   const togglePanel = (panel: Panel) => {
     setActivePanel((current) => (current === panel ? null : panel));
     setSearchOpen(false);
+    setMobileMenuOpen(false);
   };
+
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -181,6 +194,7 @@ export function TopNav() {
       if (e.key === "Escape") {
         setActivePanel(null);
         setSearchOpen(false);
+        setMobileMenuOpen(false);
         if (listening) recognitionRef.current?.stop();
       }
     };
@@ -189,15 +203,111 @@ export function TopNav() {
   }, [listening]);
 
   return (
-    <header className="fixed left-2 right-2 top-2 z-50 sm:left-4 sm:right-4 sm:top-4">
-      <div
-        ref={navRef}
-        className="glass-pill mx-auto flex max-w-6xl flex-col gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 md:flex-row md:items-center md:gap-4 md:px-5"
-      >
-        <div className="flex items-center justify-between gap-2 md:contents">
+    <>
+      <header className="fixed left-2 right-2 top-2 z-50 sm:left-4 sm:right-4 sm:top-4">
+        <div
+          ref={navRef}
+          className="glass-pill mx-auto flex max-w-6xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 md:gap-4 md:px-5"
+        >
           <Logo />
 
-          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1 md:order-last">
+          <div ref={searchRef} className="relative min-w-0 flex-1">
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-2 sm:gap-3 sm:px-4"
+            >
+              {loading ? (
+                <Loader2 size={18} className="shrink-0 animate-spin text-white/40" />
+              ) : (
+                <Search size={18} className="shrink-0 text-white/40" />
+              )}
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => handleChange(e.target.value)}
+                onFocus={() => results.length > 0 && setSearchOpen(true)}
+                placeholder="Search"
+                className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/40 outline-none sm:placeholder:text-white/40"
+              />
+              <button
+                type="button"
+                onClick={startVoiceSearch}
+                aria-label={listening ? "Stop voice search" : "Voice search"}
+                className={cn(
+                  "shrink-0 rounded-full p-0.5 transition-colors",
+                  listening
+                    ? "text-accent animate-pulse"
+                    : "text-white/40 hover:text-white/70"
+                )}
+              >
+                <Mic size={18} />
+              </button>
+            </form>
+
+            {searchOpen && results.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-2 max-h-[min(60dvh,24rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
+                {results.slice(0, 8).map((item) => {
+                  const title = item.title ?? item.name ?? "Unknown";
+                  const type = item.media_type ?? "movie";
+                  return (
+                    <button
+                      key={`${type}-${item.id}`}
+                      type="button"
+                      onClick={() => handleSelect(item)}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/10"
+                    >
+                      <img
+                        src={tmdbImage(item.poster_path, "w92")}
+                        alt={title}
+                        className="h-12 w-8 shrink-0 rounded object-cover"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-white">{title}</p>
+                        <p className="text-xs capitalize text-white/50">{type}</p>
+                      </div>
+                      <span className="shrink-0 text-xs text-accent">
+                        {item.vote_average.toFixed(1)}
+                      </span>
+                    </button>
+                  );
+                })}
+                {query.trim() && (
+                  <Link
+                    href={`/search?q=${encodeURIComponent(query.trim())}`}
+                    onClick={() => setSearchOpen(false)}
+                    className="block border-t border-white/10 px-4 py-3 text-center text-sm font-medium text-accent transition-colors hover:bg-white/5"
+                  >
+                    View all results for &ldquo;{query.trim()}&rdquo;
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActivePanel(null);
+              setSearchOpen(false);
+              setMobileMenuOpen((open) => !open);
+            }}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            className={cn(
+              "relative shrink-0 rounded-full p-2 transition-colors md:hidden",
+              mobileMenuOpen
+                ? "bg-accent/20 text-accent"
+                : "text-white/60 hover:bg-white/10 hover:text-white"
+            )}
+          >
+            <Menu size={22} />
+            {unreadCount > 0 && !mobileMenuOpen && (
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-accent" />
+            )}
+          </button>
+
+          <div className="hidden shrink-0 items-center gap-0.5 sm:gap-1 md:flex">
             <div className="relative">
               <button
                 type="button"
@@ -301,81 +411,13 @@ export function TopNav() {
             </div>
           </div>
         </div>
+      </header>
 
-        <div ref={searchRef} className="relative w-full min-w-0 md:flex-1">
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-2 sm:gap-3 sm:px-4"
-          >
-            {loading ? (
-              <Loader2 size={18} className="shrink-0 animate-spin text-white/40" />
-            ) : (
-              <Search size={18} className="shrink-0 text-white/40" />
-            )}
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => handleChange(e.target.value)}
-              onFocus={() => results.length > 0 && setSearchOpen(true)}
-              placeholder="Search movies & TV"
-              className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
-            />
-            <button
-              type="button"
-              onClick={startVoiceSearch}
-              aria-label={listening ? "Stop voice search" : "Voice search"}
-              className={cn(
-                "shrink-0 rounded-full p-0.5 transition-colors",
-                listening
-                  ? "text-accent animate-pulse"
-                  : "text-white/40 hover:text-white/70"
-              )}
-            >
-              <Mic size={18} />
-            </button>
-          </form>
-
-          {searchOpen && results.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-2 max-h-[min(60dvh,24rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#141414]/95 shadow-2xl backdrop-blur-xl">
-              {results.slice(0, 8).map((item) => {
-                const title = item.title ?? item.name ?? "Unknown";
-                const type = item.media_type ?? "movie";
-                return (
-                  <button
-                    key={`${type}-${item.id}`}
-                    type="button"
-                    onClick={() => handleSelect(item)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/10"
-                  >
-                    <img
-                      src={tmdbImage(item.poster_path, "w92")}
-                      alt={title}
-                      className="h-12 w-8 shrink-0 rounded object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-white">{title}</p>
-                      <p className="text-xs capitalize text-white/50">{type}</p>
-                    </div>
-                    <span className="shrink-0 text-xs text-accent">
-                      {item.vote_average.toFixed(1)}
-                    </span>
-                  </button>
-                );
-              })}
-              {query.trim() && (
-                <Link
-                  href={`/search?q=${encodeURIComponent(query.trim())}`}
-                  onClick={() => setSearchOpen(false)}
-                  className="block border-t border-white/10 px-4 py-3 text-center text-sm font-medium text-accent transition-colors hover:bg-white/5"
-                >
-                  View all results for &ldquo;{query.trim()}&rdquo;
-                </Link>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </header>
+      <MobileNavDrawer
+        open={mobileMenuOpen}
+        onClose={closeMobileMenu}
+        unreadCount={unreadCount}
+      />
+    </>
   );
 }
